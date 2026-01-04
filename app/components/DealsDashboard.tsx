@@ -47,7 +47,7 @@ export default function DealsDashboard() {
 
       const data = await res.json();
       if (data.status === 'success') {
-        setStatus(`Found ${data.deals_found} deals. Sent ${data.deals_sent} to ${email}.`);
+        setStatus(`Found ${data.deals_found} deals.`);
         setPreview(data.preview_html);
         setHistory(prev => [{ date: new Date().toLocaleTimeString(), count: data.deals_sent }, ...prev]);
       } else {
@@ -62,172 +62,146 @@ export default function DealsDashboard() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#0a0a0a] text-gray-300 font-mono text-sm overflow-hidden selection:bg-teal-500/30">
+    <div className="flex h-screen w-full bg-[#050505] text-[#ccc] font-mono text-xs overflow-hidden">
 
       {/* LEFT SIDEBAR: HISTORY */}
-      <div className="w-64 border-r border-[#222] flex flex-col bg-[#0f0f0f]">
-        <div className="h-12 border-b border-[#222] flex items-center px-4 font-bold tracking-wider text-xs text-gray-500">
-          HISTORY
+      <div className="w-64 border-r border-[#222] flex flex-col bg-[#080808]">
+        <div className="h-10 border-b border-[#222] flex items-center px-4 font-bold tracking-widest text-[#666] uppercase">
+          History
         </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        <div className="flex-1 overflow-y-auto">
           {history.length === 0 ? (
-            <div className="text-gray-600 px-2 py-4 italic text-xs">No runs yet</div>
+            <div className="p-4 text-[#444] italic">No prior runs</div>
           ) : (
             history.map((h, i) => (
-              <div key={i} className="px-3 py-2 hover:bg-[#1a1a1a] rounded cursor-pointer text-gray-400 group transition-colors">
-                <div className="text-white font-medium">Run #{history.length - i}</div>
-                <div className="text-xs text-gray-600 flex justify-between mt-1">
-                  <span>{h.date}</span>
-                  <span className="text-teal-500">{h.count} deals</span>
+              <div key={i} className="border-b border-[#1a1a1a] p-3 hover:bg-[#111] cursor-pointer transition-colors group">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-white font-bold group-hover:text-emerald-500">RUN_0{history.length - i}</span>
+                  <span className="text-[#444]">{h.date}</span>
+                </div>
+                <div className="text-[#666]">
+                  <span className="text-emerald-600 font-bold">{h.count}</span> items extracted
                 </div>
               </div>
             ))
           )}
         </div>
-        <div className="p-4 border-t border-[#222] text-[10px] text-gray-600 uppercase tracking-widest text-center">
-          Vinted AI Hunter v1.0
+        <div className="p-3 border-t border-[#222] text-[#333] text-[10px] uppercase">
+          System: Online
         </div>
       </div>
 
-      {/* CENTER: SOURCE / CONFIGURATION */}
-      <div className="flex-1 flex flex-col min-w-0 border-r border-[#222] bg-[#0a0a0a]">
+      {/* CENTER: CONFIGURATION */}
+      <div className="flex-1 flex flex-col min-w-0 border-r border-[#222] bg-[#050505]">
 
-        {/* Breadcrumb / Header */}
-        <div className="h-12 border-b border-[#222] flex items-center px-6 text-teal-500 font-medium tracking-wide">
-          <span className="text-gray-600 mr-2">TOOL /</span> VINTED_DEAL_FINDER
+        {/* Header */}
+        <div className="h-10 border-b border-[#222] flex items-center px-4 text-emerald-500 font-bold tracking-widest">
+          <span className="text-[#444] mr-2">/root/</span>VINTED_EXTRACTOR
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          <div className="max-w-2xl mx-auto space-y-8">
+        {/* Scrollable Area */}
+        <div className="flex-1 overflow-y-auto p-8">
 
-            <div className="border border-[#222] p-6 rounded bg-[#0f0f0f]">
-              <div className="text-xs font-bold text-gray-500 mb-6 tracking-widest uppercase border-b border-[#222] pb-2">Configuration</div>
-
-              <div className="space-y-6">
-
-                {/* Email Input */}
-                <div className="group">
-                  <label className="block text-[10px] uppercase tracking-wider text-gray-500 mb-2 group-focus-within:text-teal-500 transition-colors">Target Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter recipient email..."
-                    className="w-full bg-[#0a0a0a] border border-[#333] rounded px-4 py-3 text-white focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/50 outline-none transition-all placeholder:text-gray-700 font-sans"
-                  />
-                </div>
-
-                {/* Brand Selector */}
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-gray-500 mb-3">Filter Brands (Optional)</label>
-                  <div className="flex flex-wrap gap-2">
-                    {SUGGESTED_BRANDS.map(brand => (
-                      <button
-                        key={brand}
-                        onClick={() => toggleBrand(brand)}
-                        className={`px-3 py-1.5 rounded-full text-xs border transition-all ${selectedBrands.includes(brand)
-                            ? "bg-teal-500/10 border-teal-500/50 text-teal-400"
-                            : "bg-[#111] border-[#333] text-gray-500 hover:border-gray-500 hover:text-gray-300"
-                          }`}
-                      >
-                        {brand}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Max Results Slider */}
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <label className="block text-[10px] uppercase tracking-wider text-gray-500">Deal Limit</label>
-                    <span className="text-teal-500 font-bold">{maxResults}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="5"
-                    max="50"
-                    step="5"
-                    value={maxResults}
-                    onChange={(e) => setMaxResults(parseInt(e.target.value))}
-                    className="w-full h-1 bg-[#222] rounded-lg appearance-none cursor-pointer accent-teal-600"
-                  />
-                </div>
-
-              </div>
-            </div>
-
-            {/* Drag & Drop Visual (Static for now to match aesthetic) */}
-            <div className="border border-dashed border-[#222] rounded h-32 flex flex-col items-center justify-center text-gray-600 hover:border-teal-500/30 hover:bg-teal-900/5 transition-colors cursor-default select-none group">
-              <span className="text-2xl mb-2 group-hover:text-teal-500 transition-colors">+</span>
-              <span className="text-[10px] tracking-widest uppercase">ADDITIONAL PARAMETERS (DRAG & DROP)</span>
-            </div>
-
+          <div className="mb-8">
+            <label className="block text-[#555] mb-2 uppercase tracking-widest text-[10px]">1. Target Information</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="RECIPIENT_EMAIL"
+              className="w-full bg-[#0a0a0a] border-b border-[#333] py-2 text-white focus:border-emerald-500 outline-none transition-colors placeholder:text-[#333]"
+            />
           </div>
+
+          <div className="mb-8">
+            <label className="block text-[#555] mb-3 uppercase tracking-widest text-[10px]">2. Output Limit: {maxResults}</label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="5"
+                max="50"
+                step="5"
+                value={maxResults}
+                onChange={(e) => setMaxResults(parseInt(e.target.value))}
+                className="flex-1"
+              />
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <label className="block text-[#555] mb-3 uppercase tracking-widest text-[10px]">3. Filter Brands</label>
+            <div className="grid grid-cols-3 gap-2">
+              {SUGGESTED_BRANDS.map(brand => (
+                <button
+                  key={brand}
+                  onClick={() => toggleBrand(brand)}
+                  className={`px-2 py-2 text-center border text-[10px] uppercase tracking-wider transition-all ${selectedBrands.includes(brand)
+                      ? "bg-emerald-900/20 border-emerald-500/50 text-emerald-400"
+                      : "bg-[#0a0a0a] border-[#222] text-[#666] hover:border-[#444] hover:text-[#999]"
+                    }`}
+                >
+                  {brand}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Drop Zone Visual */}
+          <div className="border border-dashed border-[#222] h-24 flex items-center justify-center text-[#333] uppercase text-[10px] tracking-widest hover:border-[#444] transition-colors">
+            [ Optional Configuration File ]
+          </div>
+
         </div>
 
-        {/* Footer Actions */}
-        <div className="h-20 border-t border-[#222] flex items-center justify-center px-8 bg-[#0a0a0a]">
+        {/* Action Bar */}
+        <div className="border-t border-[#222] p-4 bg-[#080808]">
           <button
             onClick={handleRun}
             disabled={loading}
-            className={`w-full max-w-md py-3 rounded border font-medium tracking-widest text-xs transition-all uppercase ${loading
-                ? "bg-[#111] border-[#333] text-gray-500 cursor-wait"
-                : "bg-white text-black border-white hover:bg-gray-200 hover:scale-[1.01]"
+            className={`w-full py-3 border font-bold tracking-widest uppercase transition-all ${loading
+                ? "bg-[#111] border-[#333] text-[#444] cursor-wait"
+                : "bg-[#0a0a0a] border-white text-white hover:bg-white hover:text-black"
               }`}
           >
-            {loading ? "PROCESSING..." : "RUN EXTRACTION"}
+            {loading ? ">>> EXECUTING..." : ">>> RUN EXTRACTION"}
           </button>
         </div>
       </div>
 
-      {/* RIGHT: OUTPUT */}
-      <div className="w-[500px] bg-[#0c0c0c] flex flex-col border-l border-[#222]">
-        <div className="h-12 border-b border-[#222] flex items-center justify-between px-4 font-bold tracking-wider text-xs text-gray-500">
-          <span>OUTPUT / PREVIEW</span>
-          {preview && <button onClick={() => setPreview(null)} className="hover:text-white transition-colors">CLEAR</button>}
+      {/* RIGHT: PREVIEW */}
+      <div className="w-[500px] bg-[#050505] flex flex-col relative">
+        <div className="h-10 border-b border-[#222] flex items-center justify-between px-4 text-[#444] uppercase tracking-widest">
+          <span>Terminal Output</span>
+          {preview && <button onClick={() => setPreview(null)} className="hover:text-white">[CLEAR]</button>}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 relative bg-[#0c0c0c]">
-          {loading ? (
-            <div className="absolute inset-0 flex items-center justify-center flex-col gap-4">
-              <div className="w-8 h-8 border-2 border-teal-500/20 border-t-teal-500 rounded-full animate-spin"></div>
-              <div className="text-teal-500 text-xs tracking-widest animate-pulse">ANALYZING MARKET DATA...</div>
-            </div>
-          ) : !preview ? (
-            <div className="h-full flex flex-col items-center justify-center text-gray-800 space-y-4 select-none">
-              <span className="text-6xl font-thin opacity-20">?</span>
-              <span className="text-[10px] tracking-widest uppercase font-bold opacity-40">WAITING FOR INPUT</span>
-            </div>
-          ) : (
-            <div className="w-full h-full bg-white rounded-sm overflow-hidden shadow-2xl relative group">
-              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <a href={`data:text/html;charset=utf-8,${encodeURIComponent(preview)}`} download="deals.html" className="bg-black text-white text-[10px] px-2 py-1 rounded shadow hover:bg-teal-600">DOWNLOAD</a>
-              </div>
-              <iframe
-                srcDoc={preview}
-                className="w-full h-full border-none"
-                title="Preview"
-              />
+        <div className="flex-1 bg-[#000] p-4 font-mono text-emerald-500/80 overflow-y-auto">
+          {!loading && !preview && !status && (
+            <div className="text-[#333] mt-20 text-center">
+              waiting_for_command...
             </div>
           )}
 
-          {status && !loading && !preview && (
-            <div className={`mt-4 p-3 border text-xs text-center rounded ${status.includes("Error")
-                ? "border-red-900/30 bg-red-900/10 text-red-400"
-                : "border-teal-900/30 bg-teal-900/10 text-teal-400"
-              }`}>
-              {status}
+          {loading && (
+            <div className="space-y-1">
+              <div>&gt; Initiating sequence...</div>
+              <div className="text-emerald-300">&gt; Connecting to remote scrapers...</div>
+              <div className="animate-pulse">&gt; Analyzing data packets...</div>
             </div>
           )}
-        </div>
 
-        {/* Latex/Code output styling filler */}
-        <div className="h-32 border-t border-[#222] bg-[#080808] p-4 font-mono text-[10px] text-gray-600 overflow-hidden">
-          <div className="mb-2 uppercase tracking-wide opacity-50">System Logs</div>
-          <div className="opacity-40">
-            &gt; System ready.<br />
-            {status && <span>&gt; {status}</span>}
-          </div>
+          {status && !loading && (
+            <div className="mb-4 text-emerald-400 border-b border-[#222] pb-2">
+              &gt; STATUS: {status}
+            </div>
+          )}
+
+          {preview && (
+            <div className="w-full border border-[#222] mt-4">
+              <div className="bg-[#111] px-2 py-1 text-[10px] text-[#555] border-b border-[#222]">HTML_PREVIEW_MODE</div>
+              <iframe title="preview" srcDoc={preview} className="w-full h-[600px] bg-white border-none filter grayscale hover:grayscale-0 transition-all" />
+            </div>
+          )}
         </div>
       </div>
 
