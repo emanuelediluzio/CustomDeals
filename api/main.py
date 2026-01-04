@@ -40,25 +40,34 @@ async def run_deals_finder(request: DealRequest):
     from api.analyzer import analyze_all_deals
     from api.notifier import send_email
     
-    # 1. Scrape
-    country_data = await scrape_all_countries()
-    
-    # 2. Analyze
-    all_deals = await analyze_all_deals(country_data)
-    
-    # 3. Filter & Sort
-    # Basic filtering if needed, for now just sort by score
-    all_deals.sort(key=lambda x: getattr(x, 'deal_score', 0), reverse=True)
-    top_deals = all_deals[:request.max_results]
-    
-    # 4. Notify
-    html_summary = ""
-    if top_deals:
-        html_summary = await send_email(request.recipient_email, top_deals)
+    try:
+        # 1. Scrape
+        country_data = await scrape_all_countries()
         
-    return {
-        "status": "success",
-        "deals_found": len(all_deals),
-        "deals_sent": len(top_deals),
-        "preview_html": html_summary
-    }
+        # 2. Analyze
+        all_deals = await analyze_all_deals(country_data)
+        
+        # 3. Filter & Sort
+        # Basic filtering if needed, for now just sort by score
+        all_deals.sort(key=lambda x: getattr(x, 'deal_score', 0), reverse=True)
+        top_deals = all_deals[:request.max_results]
+        
+        # 4. Notify
+        html_summary = ""
+        if top_deals:
+            html_summary = await send_email(request.recipient_email, top_deals)
+            
+        return {
+            "status": "success",
+            "deals_found": len(all_deals),
+            "deals_sent": len(top_deals),
+            "preview_html": html_summary
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {
+            "status": "error",
+            "message": str(e),
+            "details": traceback.format_exc()
+        }
